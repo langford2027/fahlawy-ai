@@ -5,6 +5,7 @@ from app.services.whatsapp import whatsapp_service
 
 router = APIRouter()
 
+
 @router.post("/webhook/whatsapp")
 async def whatsapp_webhook(
     Body: str = Form(...),
@@ -37,7 +38,6 @@ async def whatsapp_webhook(
                     user_phone, 
                     ai_result["escalation_reason"]
                 )
-                # Add escalation note to response
                 response_text += "\n\n✨ تم إبلاغ فريقنا وبيتواصلون معاك قريباً!"
         
         # Send response via WhatsApp
@@ -48,12 +48,10 @@ async def whatsapp_webhook(
         else:
             print(f"❌ Failed to send response: {result['error']}")
         
-        # Return empty response (Twilio expects 200 OK)
         return PlainTextResponse("", status_code=200)
         
     except Exception as e:
         print(f"❌ Webhook error: {e}")
-        # Still return 200 to prevent Twilio retries
         return PlainTextResponse("", status_code=200)
 
 
@@ -83,9 +81,36 @@ async def test_greeting():
 
 
 @router.post("/test/chat")
-async def test_chat(phone: str, message: str):
+async def test_chat_post(phone: str, message: str):
     """
-    Test endpoint to simulate a chat
+    Test endpoint to simulate a chat - POST method
     """
     result = sales_agent.get_response(phone, message)
     return result
+
+
+@router.get("/test/chat")
+async def test_chat_get(phone: str = "test", message: str = "هلا"):
+    """
+    Test endpoint to simulate a chat - GET method for easy browser testing
+    """
+    result = sales_agent.get_response(phone, message)
+    return result
+```
+
+---
+
+## 📝 كيف تعدل في GitHub:
+
+1. **افتح** `app/api/webhooks.py` في GitHub
+2. **اضغط** على أيقونة القلم ✏️ (Edit)
+3. **امسح** كل الكود القديم
+4. **الصق** الكود الجديد فوق
+5. **اضغط** "Commit changes"
+6. **انتظر** دقيقة - Railway هيعمل deploy تلقائي
+
+---
+
+**لما تخلص، جرب هذا الرابط:**
+```
+https://web-production-54251.up.railway.app/api/test/chat?message=هلا
